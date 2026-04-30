@@ -1,0 +1,39 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # 🐳 Login to Docker Hub
+    - name: Login to Docker Hub
+      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+    # 🏗️ Build Docker image
+    - name: Build Docker Image
+      run: docker build -t yatrik1112/chess-app:latest .
+
+    # ⬆️ Push to Docker Hub
+    - name: Push Docker Image
+      run: docker push yatrik1112/chess-app:latest
+
+    # ☁️ Deploy to EC2
+    - name: Deploy to EC2
+      uses: appleboy/ssh-action@v0.1.10
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ubuntu
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          sudo docker pull yatrik1112/chess-app:latest
+          sudo docker stop chess-app || true
+          sudo docker rm chess-app || true
+          sudo docker run -d -p 5000:5000 --name chess-app yatrik1112/chess-app:latest

@@ -1,7 +1,18 @@
-from flask import Flask, render_template
+from flask import Flask,Response, render_template
 from app.chess_engine import *
+from prometheus_client import Counter, generate_latest
 
 app = Flask(__name__)
+
+REQUEST_COUNT = Counter('app_requests_total', 'Total Requests')
+
+@app.before_request
+def count_requests():
+    REQUEST_COUNT.inc()
+
+@app.route('/metrics')
+def metrics():
+    return Response(generate_latest(), mimetype='text/plain')
 
 @app.route('/')
 def index():

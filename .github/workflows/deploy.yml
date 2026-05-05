@@ -36,4 +36,4 @@ jobs:
           sudo docker pull yatrik1112/chess-app:latest
           sudo docker stop chess-app || true
           sudo docker rm chess-app || true
-          sudo docker run -d -p 5000:5000 --name chess-app yatrik1112/chess-app:latest
+          sudo docker run -d -p 5000:5000 --name yatrik1112/chess-app yatrik1112/chess-app:latest
